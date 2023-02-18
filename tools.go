@@ -170,9 +170,7 @@ func (t *Tools) CreateDirIfNotExist(path string) error {
 			log.Fatal(err)
 			return err
 		}
-	}
-
-	if err != nil {
+	} else if err != nil {
 		log.Fatal(err)
 		return err
 	}
