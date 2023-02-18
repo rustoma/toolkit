@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -150,5 +151,32 @@ func (t *Tools) UploadFiles(r *http.Request, uploadDir string, rename ...bool) (
 	}
 
 	return uploadedFiles, nil
+
+}
+
+// CreateDirIfNotExist creates a directory, and all necessary parents, if it does not exist.
+func (t *Tools) CreateDirIfNotExist(path string) error {
+
+	const mode = 0755
+
+	_, err := os.Stat(path)
+
+	if err == nil {
+		return nil
+	}
+
+	if os.IsNotExist(err) {
+		if err := os.MkdirAll(path, mode); err != nil {
+			log.Fatal(err)
+			return err
+		}
+	}
+
+	if err != nil {
+		log.Fatal(err)
+		return err
+	}
+
+	return nil
 
 }
