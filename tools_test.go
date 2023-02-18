@@ -48,6 +48,50 @@ var uploadTests = []struct {
 	},
 }
 
+var slugifyTests = []struct {
+	name           string
+	entryString    string
+	expectedOutput string
+	errorExpected  bool
+}{
+	{
+		name:           "valid string",
+		entryString:    "Hello World",
+		expectedOutput: "hello-world",
+		errorExpected:  false,
+	},
+	{
+		name:           "valid string",
+		entryString:    "Example string !! To test ??",
+		expectedOutput: "example-string-to-test",
+		errorExpected:  false,
+	},
+	{
+		name:           "valid string",
+		entryString:    "aąbcć dęefł",
+		expectedOutput: "a-bc-d-ef",
+		errorExpected:  false,
+	},
+	{
+		name:           "not valid string",
+		entryString:    "",
+		expectedOutput: "",
+		errorExpected:  true,
+	},
+	{
+		name:           "japanese not valid string",
+		entryString:    "こんにちは世界",
+		expectedOutput: "",
+		errorExpected:  true,
+	},
+	{
+		name:           "japanese valid string",
+		entryString:    "helloこんにちは世界world",
+		expectedOutput: "hello-world",
+		errorExpected:  false,
+	},
+}
+
 func TestTools_UploadFiles(t *testing.T) {
 	for _, e := range uploadTests {
 		pr, pw := io.Pipe()
@@ -183,5 +227,23 @@ func TestTools_CreateDirIfNotExist(t *testing.T) {
 
 	//clean up
 	_ = os.Remove("./testdata/create-dir-if-not-exist")
+
+}
+
+func TestTools_Slugify(t *testing.T) {
+
+	var toolkit Tools
+
+	for _, e := range slugifyTests {
+		slug, err := toolkit.Slugify(e.entryString)
+
+		if err != nil && !e.errorExpected {
+			t.Errorf("%s error received when none expected: %s", e.name, err.Error())
+		}
+
+		if !e.errorExpected && slug != e.expectedOutput {
+			t.Errorf("%s: Slugify return %s, but expected %s", e.name, slug, e.expectedOutput)
+		}
+	}
 
 }
