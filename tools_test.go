@@ -2,6 +2,8 @@ package toolkit
 
 import (
 	"bytes"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"image"
 	"image/png"
@@ -353,5 +355,32 @@ func TestTools_WriteJSON(t *testing.T) {
 	err := testTools.WriteJSON(rr, http.StatusOK, paylod, headers)
 	if err != nil {
 		t.Errorf("failed to write JSON: %v", err)
+	}
+}
+
+func TestTools_ErrorJSON(t *testing.T) {
+	var testTools Tools
+
+	rr := httptest.NewRecorder()
+
+	err := testTools.ErrorJSON(rr, errors.New("Badly formated JSON"), http.StatusServiceUnavailable)
+	if err != nil {
+		t.Errorf("failed to send Error JSON: %v", err)
+	}
+
+	var payload JSONResponse
+	decoder := json.NewDecoder(rr.Body)
+
+	err = decoder.Decode(&payload)
+	if err != nil {
+		t.Error("received error when decoding JSON", err)
+	}
+
+	if !payload.Error {
+		t.Error("error set to false in JSON, but it should be true")
+	}
+
+	if rr.Code != http.StatusServiceUnavailable {
+		t.Errorf("received response of status %d, but it should be %d", rr.Code, http.StatusServiceUnavailable)
 	}
 }
