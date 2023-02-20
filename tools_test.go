@@ -355,3 +355,19 @@ func TestTools_WriteJSON(t *testing.T) {
 		t.Errorf("failed to write JSON: %v", err)
 	}
 }
+
+// ErrorJSON takes and error and optional a status code, and generates and sends a JSON error message.
+func (t *Tools) ErrorJSON(w http.ResponseWriter, err error, status ...int) error {
+	statusCode := http.StatusBadRequest
+
+	if len(status) > 0 {
+		statusCode = status[0]
+	}
+
+	var payload JSONResponse
+
+	payload.Error = true
+	payload.Message = err.Error()
+
+	return t.WriteJSON(w, statusCode, payload)
+}
